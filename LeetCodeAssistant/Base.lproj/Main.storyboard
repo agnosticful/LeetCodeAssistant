@@ -50,7 +50,7 @@
                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="your@email.com" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wYr-Ne-2fu">
                                                         <rect key="frame" x="0.0" y="22.5" width="256" height="34"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                        <textInputTraits key="textInputTraits" textContentType="email"/>
+                                                        <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="next" textContentType="email"/>
                                                         <connections>
                                                             <action selector="onUsernameOrPasswordTextFieldValueChanged:" destination="BYZ-38-t0r" eventType="editingChanged" id="wwg-eN-Kq5"/>
                                                         </connections>
@@ -69,7 +69,7 @@
                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jk9-nl-7qf">
                                                         <rect key="frame" x="0.0" y="22.5" width="256" height="34"/>
                                                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                        <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
+                                                        <textInputTraits key="textInputTraits" keyboardType="alphabet" returnKeyType="go" secureTextEntry="YES" textContentType="password"/>
                                                         <connections>
                                                             <action selector="onUsernameOrPasswordTextFieldValueChanged:" destination="BYZ-38-t0r" eventType="editingChanged" id="fLF-dd-L1I"/>
                                                         </connections>
@@ -422,7 +422,4 @@ The characters in J are distinct.</string>
     <resources>
         <image name="Assistant" width="162" height="181"/>
     </resources>
-    <inferredMetricsTieBreakers>
-        <segue reference="KWJ-2c-1aE"/>
-    </inferredMetricsTieBreakers>
 </document>
