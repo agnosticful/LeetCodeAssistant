@@ -4,12 +4,8 @@ class LeetCodeProblemRepository {
     var sessionToken: String?
     
     func signIn(username: String, password: String, completion: @escaping (String?, Error?) -> Void) {
-        URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
-            let response = response as! HTTPURLResponse
-            let cookies = HTTPCookie.cookies(withResponseHeaderFields: response.allHeaderFields as! [String: String], for: response.url!)
-            let csrfTokenCookie = cookies.first { $0.name == "csrftoken" }
-
-            guard let csrfToken = csrfTokenCookie?.value else {
+        getCsrfToken { (csrfToken, _) in
+            guard let csrfToken = csrfToken else {
                 return
             }
             
@@ -44,7 +40,7 @@ class LeetCodeProblemRepository {
                     completion(nil, LeetCodeSigninError.wrongEmailOrPassword)
                 }
                 .resume()
-        }.resume()
+        }
     }
     
     func signOut() {
@@ -102,7 +98,21 @@ class LeetCodeProblemRepository {
         }
     }
     
-    class DelegateToHandle302: NSObject, URLSessionTaskDelegate {
+    private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
+        URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
+            let response = response as! HTTPURLResponse
+            let cookies = HTTPCookie.cookies(withResponseHeaderFields: response.allHeaderFields as! [String: String], for: response.url!)
+            let csrfTokenCookie = cookies.first { $0.name == "csrftoken" }
+
+            guard let csrfToken = csrfTokenCookie?.value else {
+                return completion(nil, nil)
+            }
+            
+            completion(csrfToken, nil)
+        }.resume()
+    }
+    
+    private class DelegateToHandle302: NSObject, URLSessionTaskDelegate {
         var compl: (_ response: HTTPURLResponse) -> Void
         
         init(completion: @escaping (_ response: HTTPURLResponse) -> Void) {
