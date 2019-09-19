@@ -1,8 +1,6 @@
 import UIKit
 
 class ProblemListTableViewController: UITableViewController, UISearchBarDelegate {
-    let leetCodeProblemRepository = LeetCodeProblemRepository()
-    
     var solvedProblems = [UserLeetCodeProblem]()
     var attemptedProblems = [UserLeetCodeProblem]()
     var unsolvedProblems = [UserLeetCodeProblem]()
@@ -24,15 +22,15 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         
         areProblemsLoading = true
 
-        leetCodeProblemRepository.getAllProblems { (problems, error) in
+        LeetCodeProblemRepository.shared.getAllProblems { (problems, error) in
             guard let problems = problems else {
                 return
             }
             
             DispatchQueue.main.async {
-                self.solvedProblems = problems.filter({ $0.status == .solved })
-                self.attemptedProblems = problems.filter({ $0.status == .attempted })
-                self.unsolvedProblems = problems.filter({ $0.status == .unsolved })
+                self.solvedProblems = problems.filter({ $0.status == .solved }).sorted { $0.problem.number < $1.problem.number }
+                self.attemptedProblems = problems.filter({ $0.status == .attempted }).sorted { $0.problem.number < $1.problem.number }
+                self.unsolvedProblems = problems.filter({ $0.status == .unsolved }).sorted { $0.problem.number < $1.problem.number }
                 self.filteredSolvedProblems = self.solvedProblems
                 self.filteredAttemptedProblems = self.attemptedProblems
                 self.filteredUnsolvedProblems = self.unsolvedProblems

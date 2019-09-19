@@ -48,53 +48,29 @@ class LeetCodeProblemRepository {
     }
 
     func getAllProblems(completion: @escaping ([UserLeetCodeProblem]?, Error?) -> Void) {
-        // TODO: replace with actual implementation that calls Web API
-        
-        DispatchQueue(label: "nonono").async {
-            usleep(1750 * 1000)
+        getCsrfToken { (csrfToken, _) in
+            guard let csrfToken = csrfToken else {
+                return
+            }
             
-            completion([
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "two-sum", number: 1, difficulty: .easy, title: "Two Sum"),
-                    status: .solved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "add-two-numbers", number: 2, difficulty: .medium, title: "Add Two Numbers"),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "longest-substring-without-repeating-characters", number: 3, difficulty: .medium, title: "Longest Substring Without Repeating Characters"),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "median-of-two-sorted-arrays", number: 4, difficulty: .hard, title: "Median of Two Sorted Arrays "),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "longest-palindromic-substring", number: 5, difficulty: .medium, title: "Longest Palindromic Substring    "),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "zigzag-conversion", number: 6, difficulty: .medium, title: "ZigZag Conversion"),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "reverse-integer", number: 7, difficulty: .easy, title: "Reverse Integer"),
-                    status: .solved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "string-to-integer-atoi", number: 8, difficulty: .medium, title: "String to Integer (atoi)"),
-                    status: .unsolved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "palindrome-number", number: 9, difficulty: .easy, title: "Palindrome Number"),
-                    status: .solved
-                ),
-                UserLeetCodeProblem(
-                    problem: LeetCodeProblem(id: "regular-expression-matching", number: 10, difficulty: .hard, title: "Regular Expression Matching"),
-                    status: .unsolved
-                ),
-            ], nil)
+            var request = URLRequest(url: URL(string: "https://leetcode.com/api/problems/all/")!)
+            
+            request.allHTTPHeaderFields = [
+                "referer": "https://leetcode.com/problemset/all/",
+                "cookie": "csrftoken=\(csrfToken);LEETCODE_SESSION=\(self.sessionToken!)"
+            ]
+            
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    return completion(nil, nil)
+                }
+                
+                guard let json = try? JSONDecoder().decode(LeetCodeAPIAllJSON.self, from: data) else {
+                    return completion(nil, nil)
+                }
+                
+                completion(json.problems, nil)
+            }.resume()
         }
     }
     
@@ -121,6 +97,84 @@ class LeetCodeProblemRepository {
         
         func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
             compl(response)
+        }
+    }
+    
+    private struct LeetCodeAPIAllJSON: Decodable {
+        var problems: [APIUserLeetCodeProblem]
+        
+        private enum CodingKeys: String, CodingKey {
+            case problems = "stat_status_pairs"
+        }
+        
+        struct APIUserLeetCodeProblem: Decodable, UserLeetCodeProblem {
+            var problem: LeetCodeProblem
+            var status: UserLeetCodeProblemStatus
+            
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                let statContainer = try container.nestedContainer(keyedBy: StatCodingKeys.self, forKey: .stat)
+                let difficultyContainer = try container.nestedContainer(keyedBy: DifficultyCodingKeys.self, forKey: .difficulty)
+                
+                let id = try statContainer.decode(String.self, forKey: .id)
+                let number = try statContainer.decode(Int.self, forKey: .number)
+                let difficultyInt = try difficultyContainer.decode(Int.self, forKey: .difficulty)
+                let title = try statContainer.decode(String.self, forKey: .title)
+                let statusString = try container.decode(String?.self, forKey: .status)
+                
+                var difficulty: LeetCodeProblemDifficuly!
+                
+                switch difficultyInt {
+                case 1:
+                    difficulty = .easy
+                case 2:
+                    difficulty = .medium
+                case 3:
+                    difficulty = .hard
+                default:
+                    assertionFailure()
+                }
+                
+                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title)
+                
+                var status: UserLeetCodeProblemStatus!
+                
+                switch statusString {
+                case "ac":
+                    status = .solved
+                case "notac":
+                    status = .attempted
+                case nil:
+                    status = .unsolved
+                default:
+                    assertionFailure()
+                }
+                
+                self.status = status
+            }
+            
+            private enum CodingKeys: String, CodingKey {
+                case stat = "stat"
+                case difficulty = "difficulty"
+                case status = "status"
+            }
+            
+            private enum StatCodingKeys: String, CodingKey {
+                case id = "question__title_slug"
+                case number = "frontend_question_id"
+                case title = "question__title"
+            }
+            
+            private enum DifficultyCodingKeys: String, CodingKey {
+                case difficulty = "level"
+            }
+        }
+        
+        struct APILeetCodeProblem: LeetCodeProblem {
+            var id: String
+            var number: Int
+            var difficulty: LeetCodeProblemDifficuly
+            var title: String
         }
     }
     
