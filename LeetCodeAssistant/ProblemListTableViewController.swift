@@ -1,8 +1,6 @@
 import UIKit
 
 class ProblemListTableViewController: UITableViewController, UISearchBarDelegate {
-    let leetCodeProblemRepository = LeetCodeProblemRepository()
-    
     var solvedProblems = [UserLeetCodeProblem]()
     var attemptedProblems = [UserLeetCodeProblem]()
     var unsolvedProblems = [UserLeetCodeProblem]()
@@ -20,21 +18,26 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         searchController.searchBar.placeholder = "Search Problems"
         searchController.searchBar.delegate = self
 
-        self.navigationItem.searchController = searchController
+        navigationItem.searchController = searchController
         
-        leetCodeProblemRepository.getAllProblems { (problems, error) in
+        areProblemsLoading = true
+
+        LeetCodeProblemRepository.shared.getAllProblems { (problems, error) in
             guard let problems = problems else {
                 return
             }
-
-            solvedProblems = problems.filter({ $0.status == .solved })
-            attemptedProblems = problems.filter({ $0.status == .attempted })
-            unsolvedProblems = problems.filter({ $0.status == .unsolved })
-            filteredSolvedProblems = solvedProblems
-            filteredAttemptedProblems = attemptedProblems
-            filteredUnsolvedProblems = unsolvedProblems
             
-            tableView.reloadData()
+            DispatchQueue.main.async {
+                self.solvedProblems = problems.filter({ $0.status == .solved }).sorted { $0.problem.number < $1.problem.number }
+                self.attemptedProblems = problems.filter({ $0.status == .attempted }).sorted { $0.problem.number < $1.problem.number }
+                self.unsolvedProblems = problems.filter({ $0.status == .unsolved }).sorted { $0.problem.number < $1.problem.number }
+                self.filteredSolvedProblems = self.solvedProblems
+                self.filteredAttemptedProblems = self.attemptedProblems
+                self.filteredUnsolvedProblems = self.unsolvedProblems
+                self.areProblemsLoading = false
+                
+                self.tableView.reloadData()
+            }
         }
     }
 

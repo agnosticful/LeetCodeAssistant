@@ -1,10 +1,10 @@
 import Foundation
 
-struct LeetCodeProblem {
-    var id: String
-    var number: Int
-    var difficulty: LeetCodeProblemDifficuly
-    var title: String
+protocol LeetCodeProblem {
+    var id: String { get }
+    var number: Int { get }
+    var difficulty: LeetCodeProblemDifficuly { get }
+    var title: String { get }
 }
 
 enum LeetCodeProblemDifficuly {
@@ -13,9 +13,9 @@ enum LeetCodeProblemDifficuly {
     case hard
 }
 
-struct UserLeetCodeProblem {
-    var problem: LeetCodeProblem
-    var status: UserLeetCodeProblemStatus
+protocol UserLeetCodeProblem {
+    var problem: LeetCodeProblem { get }
+    var status: UserLeetCodeProblemStatus { get }
 }
 
 enum UserLeetCodeProblemStatus {
