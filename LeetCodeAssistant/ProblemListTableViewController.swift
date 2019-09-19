@@ -20,21 +20,26 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         searchController.searchBar.placeholder = "Search Problems"
         searchController.searchBar.delegate = self
 
-        self.navigationItem.searchController = searchController
+        navigationItem.searchController = searchController
         
+        areProblemsLoading = true
+
         leetCodeProblemRepository.getAllProblems { (problems, error) in
             guard let problems = problems else {
                 return
             }
-
-            solvedProblems = problems.filter({ $0.status == .solved })
-            attemptedProblems = problems.filter({ $0.status == .attempted })
-            unsolvedProblems = problems.filter({ $0.status == .unsolved })
-            filteredSolvedProblems = solvedProblems
-            filteredAttemptedProblems = attemptedProblems
-            filteredUnsolvedProblems = unsolvedProblems
             
-            tableView.reloadData()
+            DispatchQueue.main.async {
+                self.solvedProblems = problems.filter({ $0.status == .solved })
+                self.attemptedProblems = problems.filter({ $0.status == .attempted })
+                self.unsolvedProblems = problems.filter({ $0.status == .unsolved })
+                self.filteredSolvedProblems = self.solvedProblems
+                self.filteredAttemptedProblems = self.attemptedProblems
+                self.filteredUnsolvedProblems = self.unsolvedProblems
+                self.areProblemsLoading = false
+                
+                self.tableView.reloadData()
+            }
         }
     }
 
