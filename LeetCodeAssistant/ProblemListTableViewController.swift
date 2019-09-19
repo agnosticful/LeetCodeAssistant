@@ -148,7 +148,10 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         alertController.addAction(UIAlertAction(title: "Log out", style: .destructive, handler: { (UIAlertAction) in
-            // log out
+            LeetCodeProblemRepository.shared.signOut()
+            LeetCodeSessionStorage.shared.delete()
+            
+            self.performSegue(withIdentifier: "SignOut", sender: self)
         }))
 
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
