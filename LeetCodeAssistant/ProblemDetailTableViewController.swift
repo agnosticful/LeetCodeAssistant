@@ -88,7 +88,7 @@ class ProblemDetailTableViewController: UITableViewController {
             if isSubmissionLoading {
                 cell.setLoading(problem: problem)
             } else {
-                cell.set(problem: problem, lastSubmission: submissions.last)
+                cell.set(problem: problem, lastSubmission: submissions.first)
             }
 
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
