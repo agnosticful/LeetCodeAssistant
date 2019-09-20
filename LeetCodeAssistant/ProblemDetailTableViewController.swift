@@ -2,15 +2,16 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
-    var submissions = [LeetCodeSubmission]()
+    var submissions: [LeetCodeSubmission]?
     var isSubmissionLoading = false
-    var lastSubmission: LeetCodeSubmission?
-    var isLastSubmissionLoading = false
+    var lastBestSubmission: LeetCodeSubmission?
+    var isLastBestSubmission = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         isSubmissionLoading = true
+        isLastBestSubmission = true
         tableView.reloadData()
         
         LeetCodeProblemRepository.shared.getAllSubmissions(of: problem!) { (submissions, error) in
@@ -19,16 +20,18 @@ class ProblemDetailTableViewController: UITableViewController {
             }
             
             self.submissions = submissions
+            self.lastBestSubmission = submissions.first { $0.status == .accepted } ?? submissions.first
             
             DispatchQueue.main.async {
                 self.isSubmissionLoading = false
+                self.isLastBestSubmission = false
                 self.tableView.reloadData()
             }
         }
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        if !isSubmissionLoading && submissions.count == 0 {
+        if !isSubmissionLoading && submissions == nil {
             return 2
         }
 
@@ -44,7 +47,15 @@ class ProblemDetailTableViewController: UITableViewController {
         case 2:
             return 1
         case 3:
-            return isSubmissionLoading ? 1 : submissions.count
+            if isSubmissionLoading {
+                return 1
+            }
+            
+            if let submissions = submissions {
+                return submissions.count
+            }
+            
+            return 0
         default:
             return 0
         }
@@ -57,7 +68,11 @@ class ProblemDetailTableViewController: UITableViewController {
         case 2:
             return "Your Code"
         case 3:
-            return isSubmissionLoading ? "Your Submissions" : "Your Submissions (\(submissions.count))"
+            if let submissions = submissions {
+                return "Your Submissions (\(submissions.count))"
+            }
+            
+            return "Your Submissions"
         default:
             return nil
         }
@@ -70,8 +85,8 @@ class ProblemDetailTableViewController: UITableViewController {
                 return nil
             }
             
-            if let lastSubmission = submissions.first {
-                return "Written in \(lastSubmission.usedLanguage). Took \(lastSubmission.runtime) and \(lastSubmission.memoryUsage) RAM to finish."
+            if let submission = lastBestSubmission {
+                return "Written in \(submission.usedLanguage). Took \(submission.runtime) and \(submission.memoryUsage) RAM to finish."
             }
             
             return nil
@@ -88,7 +103,7 @@ class ProblemDetailTableViewController: UITableViewController {
             if isSubmissionLoading {
                 cell.setLoading(problem: problem)
             } else {
-                cell.set(problem: problem, lastSubmission: submissions.first)
+                cell.set(problem: problem, submission: lastBestSubmission)
             }
 
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
@@ -115,6 +130,10 @@ class ProblemDetailTableViewController: UITableViewController {
             return cell
         case (3, _):
             if isSubmissionLoading {
+                return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
+            }
+            
+            guard let submissions = submissions else {
                 return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
             }
             
@@ -155,7 +174,7 @@ class ProblemDetailTableViewMetaCell: UITableViewCell {
         lastSubmissionStatusLabel.textColor = .secondarySystemFill
     }
     
-    func set(problem: LeetCodeProblem, lastSubmission: LeetCodeSubmission?) {
+    func set(problem: LeetCodeProblem, submission: LeetCodeSubmission?) {
         numberLabel.text = "No. \(problem.number)"
 
         switch problem.difficulty {
@@ -170,8 +189,8 @@ class ProblemDetailTableViewMetaCell: UITableViewCell {
             difficultyLabel.textColor = .systemRed
         }
         
-        if let lastSubmission = lastSubmission {
-            switch lastSubmission.status {
+        if let submission = submission {
+            switch submission.status {
             case .accepted:
                 lastSubmissionStatusLabel.text = "Accepted"
                 lastSubmissionStatusLabel.textColor = .systemGreen
