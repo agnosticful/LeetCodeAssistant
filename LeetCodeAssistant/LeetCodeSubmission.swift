@@ -1,12 +1,11 @@
 import Foundation
 
-struct LeetCodeSubmission {
-    var status: LeetCodeSubmissionStatus
-    var submittedAt: Date
-    var usedLanguage: String
-    var runtimeDuration: UnitDuration
-    var usedMemoryInBytes: Int
-    var code: String
+protocol LeetCodeSubmission {
+    var status: LeetCodeSubmissionStatus { get }
+    var submittedAt: Date { get }
+    var usedLanguage: String { get }
+    var runtime: String { get }
+    var memoryUsage: String { get }
 }
 
 enum LeetCodeSubmissionStatus {
