@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A44D32B5233143EF0052A2FC /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A44D32B4233143EF0052A2FC /* SignInViewController.swift */; };
 		A44D32B72332944B0052A2FC /* LeetCodeSessionStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A44D32B62332944B0052A2FC /* LeetCodeSessionStorage.swift */; };
+		A467F71B233406AB00911B78 /* LeetCodeProblemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A467F71A233406AB00911B78 /* LeetCodeProblemCache.swift */; };
 		A4E92C96232D806200F939C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92C95232D806200F939C0 /* AppDelegate.swift */; };
 		A4E92C98232D806200F939C0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92C97232D806200F939C0 /* SceneDelegate.swift */; };
 		A4E92C9D232D806200F939C0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A4E92C9B232D806200F939C0 /* Main.storyboard */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		A44D32B4233143EF0052A2FC /* SignInViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
 		A44D32B62332944B0052A2FC /* LeetCodeSessionStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeSessionStorage.swift; sourceTree = "<group>"; };
+		A467F71A233406AB00911B78 /* LeetCodeProblemCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeProblemCache.swift; sourceTree = "<group>"; };
 		A4E92C92232D806200F939C0 /* LeetCodeAssistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LeetCodeAssistant.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4E92C95232D806200F939C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A4E92C97232D806200F939C0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 				A4E92CA9232D836F00F939C0 /* ProblemListTableViewCell.swift */,
 				A4E92CAF232DABAB00F939C0 /* ProblemDetailTableViewController.swift */,
 				A4F4DDBD232EA83300A8D5F9 /* LeetCodeProblemRepository.swift */,
+				A467F71A233406AB00911B78 /* LeetCodeProblemCache.swift */,
 				A44D32B62332944B0052A2FC /* LeetCodeSessionStorage.swift */,
 				A4E92CAB232D83C100F939C0 /* ProblemListTableViewController.swift */,
 				A4E92CAD232D8C7F00F939C0 /* LeetCodeProblem.swift */,
@@ -162,6 +165,7 @@
 				A4F4DDBE232EA83300A8D5F9 /* LeetCodeProblemRepository.swift in Sources */,
 				A4E92CAC232D83C100F939C0 /* ProblemListTableViewController.swift in Sources */,
 				A4E92CB2232DADB300F939C0 /* LeetCodeSubmission.swift in Sources */,
+				A467F71B233406AB00911B78 /* LeetCodeProblemCache.swift in Sources */,
 				A4E92CAA232D836F00F939C0 /* ProblemListTableViewCell.swift in Sources */,
 				A4E92CB0232DABAB00F939C0 /* ProblemDetailTableViewController.swift in Sources */,
 				A44D32B5233143EF0052A2FC /* SignInViewController.swift in Sources */,
