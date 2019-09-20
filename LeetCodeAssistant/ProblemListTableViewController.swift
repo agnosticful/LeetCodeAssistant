@@ -21,23 +21,40 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         navigationItem.searchController = searchController
         
         areProblemsLoading = true
+        var isCacheLoaded = false
+
+        if let problems = LeetCodeProblemCache.shared.loadAllUserLeetCodeProblems() {
+            setProblems(problems)
+
+            isCacheLoaded = true
+
+            areProblemsLoading = false
+        }
 
         LeetCodeProblemRepository.shared.getAllProblems { (problems, error) in
             guard let problems = problems else {
+                if !isCacheLoaded {
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: "Connection Failed", message: "You seem offline. You need to be online at least once to download problem list from LeetCode server.", preferredStyle: .alert)
+
+                        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+
+                        self.present(alert, animated: true)
+                    }
+                }
+
                 return
             }
-            
+
             DispatchQueue.main.async {
-                self.solvedProblems = problems.filter({ $0.status == .solved }).sorted { $0.problem.number < $1.problem.number }
-                self.attemptedProblems = problems.filter({ $0.status == .attempted }).sorted { $0.problem.number < $1.problem.number }
-                self.unsolvedProblems = problems.filter({ $0.status == .unsolved }).sorted { $0.problem.number < $1.problem.number }
-                self.filteredSolvedProblems = self.solvedProblems
-                self.filteredAttemptedProblems = self.attemptedProblems
-                self.filteredUnsolvedProblems = self.unsolvedProblems
+                self.setProblems(problems)
+
                 self.areProblemsLoading = false
                 
                 self.tableView.reloadData()
             }
+            
+            LeetCodeProblemCache.shared.saveAllUserLeetCodeProblems(problems: problems)
         }
     }
 
@@ -160,5 +177,15 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
 
         present(alertController, animated: true, completion: nil)
+    }
+    
+    func setProblems(_ problems: [UserLeetCodeProblem]) {
+        solvedProblems = problems.filter({ $0.status == .solved }).sorted { $0.problem.number < $1.problem.number }
+        attemptedProblems = problems.filter({ $0.status == .attempted }).sorted { $0.problem.number < $1.problem.number }
+        unsolvedProblems = problems.filter({ $0.status == .unsolved }).sorted { $0.problem.number < $1.problem.number }
+
+        filteredSolvedProblems = solvedProblems
+        filteredAttemptedProblems = attemptedProblems
+        filteredUnsolvedProblems = unsolvedProblems
     }
 }
