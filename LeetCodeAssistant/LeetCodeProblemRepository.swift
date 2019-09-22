@@ -1,21 +1,5 @@
 import Foundation
 
-struct JsonData: Codable {
-    let data: Data
-    
-    struct Data: Codable {
-        let question: Question
-        
-        struct Question: Codable {
-            let questionId: String
-            let title: String
-            let titleSlug: String
-            let content: String
-            
-        }
-    }
-}
-
 class LeetCodeProblemRepository {
     var sessionToken: String?
     
@@ -135,7 +119,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
         
         request.httpMethod = "POST"
         
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n        questionId\\n        questionFrontendId\\n        boundTopicId\\n        title\\n        titleSlug\\n        content\\n    }\\n}\"}".data(using: .utf8)
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n        questionId\\n        title\\n        titleSlug\\n        content\\n    }\\n}\"}".data(using: .utf8)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
@@ -253,6 +237,22 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
             var difficulty: LeetCodeProblemDifficuly
             var title: String
             var description: String
+        }
+    }
+    
+    private struct JsonData: Codable {
+        let data: Data
+        
+        struct Data: Codable {
+            let question: Question
+            
+            struct Question: Codable {
+                let questionId: String
+                let title: String
+                let titleSlug: String
+                let content: String
+                
+            }
         }
     }
     
