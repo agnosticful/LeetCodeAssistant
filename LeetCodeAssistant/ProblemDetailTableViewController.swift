@@ -29,7 +29,7 @@ class ProblemDetailTableViewController: UITableViewController {
             }
         }
         
-        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: "two-sum") { (content) in self.problem.description = content
+        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (content) in self.problem.description = content
         }
     }
 
