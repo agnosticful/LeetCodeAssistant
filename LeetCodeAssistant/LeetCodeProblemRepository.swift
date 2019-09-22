@@ -74,6 +74,36 @@ class LeetCodeProblemRepository {
         }
     }
     
+    func getAllSubmissions(of problem: LeetCodeProblem, completion: @escaping ([LeetCodeSubmission]?, Error?) -> Void) {
+        getCsrfToken { (csrfToken, error) in
+            guard let csrfToken = csrfToken else {
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort)
+            }
+
+            var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
+            request.httpMethod = "POST"
+            request.allHTTPHeaderFields = [
+                "content-type": "application/json; charset=utf-8",
+                "referer": "https://leetcode.com/problems/\(problem.id)/submissions/",
+                "cookie": "csrftoken=\(csrfToken);LEETCODE_SESSION=\(self.sessionToken!)",
+                "x-csrftoken": csrfToken
+            ]
+            request.httpBody = "{\"operationName\":\"Submissions\",\"variables\":{\"offset\":0,\"limit\":50,\"lastKey\":null,\"questionSlug\":\"\(problem.id)\"},\"query\":\"query Submissions($offset: Int!, $limit: Int!, $lastKey: String, $questionSlug: String!) { submissionList(offset: $offset, limit: $limit, lastKey: $lastKey, questionSlug: $questionSlug) { lastKey hasNext submissions { id statusDisplay lang runtime timestamp url isPending memory __typename } __typename }}\"}".data(using: .utf8)
+
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    return completion(nil, LeetCodeSubmissionAPIError.noPreciseResponseReturned)
+                }
+
+                guard let json = try? JSONDecoder().decode(LeetCodeSubmissionAPIJSON.self, from: data) else {
+                    return completion(nil, LeetCodeSubmissionAPIError.jsonDecodeFailed)
+                }
+                
+                completion(json.submissions, nil)
+            }.resume()
+        }
+    }
+    
     private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
         URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
             let response = response as! HTTPURLResponse
@@ -183,4 +213,104 @@ class LeetCodeProblemRepository {
 
 enum LeetCodeSigninError: Error {
     case wrongEmailOrPassword
+}
+
+enum LeetCodeAPIConnectionError: Error {
+    case networkAbort
+}
+
+enum LeetCodeSubmissionAPIError: Error {
+    case noPreciseResponseReturned
+    case jsonDecodeFailed
+}
+
+fileprivate struct LeetCodeSubmissionAPIJSON: Decodable {
+    var submissions: [APILeetCodeSubmission]
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let dataContainer = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
+        let submissionListContainer = try dataContainer.nestedContainer(keyedBy: SubmissionListCodingKeys.self, forKey: .submissionList)
+
+        submissions = try submissionListContainer.decode([APILeetCodeSubmission].self, forKey: .submissions)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case data = "data"
+    }
+    
+    private enum DataCodingKeys: String, CodingKey {
+        case submissionList = "submissionList"
+    }
+    
+    private enum SubmissionListCodingKeys: String, CodingKey {
+        case submissions = "submissions"
+    }
+}
+
+fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
+    var status: LeetCodeSubmissionStatus
+    var submittedAt: Date
+    var usedLanguage: String
+    var runtime: String
+    var memoryUsage: String
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let statusString = try container.decode(String.self, forKey: .statusString)
+        let submissionTimestamp = try container.decode(String.self, forKey: .submissionTimestamp)
+
+        usedLanguage = sanitizeUsedLanguage(try container.decode(String.self, forKey: .usedLanguage))
+        runtime = sanitizeRuntime(try container.decode(String.self, forKey: .runtimeDurationString))
+        memoryUsage = sanitizeMemoryUsage(try container.decode(String.self, forKey: .usedMemoryString))
+        
+        switch statusString {
+        case "Accepted":
+            status = .accepted
+        default:
+            status = .failed
+        }
+
+        guard let submissionTimestampInt = Int(submissionTimestamp) else {
+            throw APILeetCodeSubmissionError.submittedAtDecodeFailure
+        }
+        
+        submittedAt = Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(submissionTimestampInt)))
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case statusString = "statusDisplay"
+        case usedLanguage = "lang"
+        case runtimeDurationString = "runtime"
+        case usedMemoryString = "memory"
+        case submissionTimestamp = "timestamp"
+    }
+    
+    enum APILeetCodeSubmissionError: Error {
+        case submittedAtDecodeFailure
+    }
+}
+
+fileprivate func sanitizeUsedLanguage(_ language: String) -> String {
+    if language == "javascript" {
+        return "JavaScript"
+    }
+    
+    return language.capitalized
+}
+
+fileprivate func sanitizeRuntime(_ runtime: String) -> String {
+    if runtime == "N/A" {
+        return "0 ms"
+    }
+    
+    return runtime
+}
+
+fileprivate func sanitizeMemoryUsage(_ memoryUsage: String) -> String {
+    if memoryUsage == "N/A" {
+        return "0 MB"
+    }
+    
+    return memoryUsage
 }
