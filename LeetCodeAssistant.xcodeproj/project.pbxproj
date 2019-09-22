@@ -21,6 +21,7 @@
 		A4E92CB0232DABAB00F939C0 /* ProblemDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92CAF232DABAB00F939C0 /* ProblemDetailTableViewController.swift */; };
 		A4E92CB2232DADB300F939C0 /* LeetCodeSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92CB1232DADB300F939C0 /* LeetCodeSubmission.swift */; };
 		A4F4DDBE232EA83300A8D5F9 /* LeetCodeProblemRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F4DDBD232EA83300A8D5F9 /* LeetCodeProblemRepository.swift */; };
+		D9BDD66123375BD800A2D6A9 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BDD66023375BD800A2D6A9 /* Utility.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		A4E92CAF232DABAB00F939C0 /* ProblemDetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProblemDetailTableViewController.swift; sourceTree = "<group>"; };
 		A4E92CB1232DADB300F939C0 /* LeetCodeSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeSubmission.swift; sourceTree = "<group>"; };
 		A4F4DDBD232EA83300A8D5F9 /* LeetCodeProblemRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeProblemRepository.swift; sourceTree = "<group>"; };
+		D9BDD66023375BD800A2D6A9 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 				A4E92C9E232D806400F939C0 /* Assets.xcassets */,
 				A4E92CA0232D806400F939C0 /* LaunchScreen.storyboard */,
 				A4E92CA3232D806400F939C0 /* Info.plist */,
+				D9BDD66023375BD800A2D6A9 /* Utility.swift */,
 			);
 			path = LeetCodeAssistant;
 			sourceTree = "<group>";
@@ -170,6 +173,7 @@
 				A4E92CB0232DABAB00F939C0 /* ProblemDetailTableViewController.swift in Sources */,
 				A44D32B5233143EF0052A2FC /* SignInViewController.swift in Sources */,
 				A4E92CAE232D8C7F00F939C0 /* LeetCodeProblem.swift in Sources */,
+				D9BDD66123375BD800A2D6A9 /* Utility.swift in Sources */,
 				A4E92C96232D806200F939C0 /* AppDelegate.swift in Sources */,
 				A4E92C98232D806200F939C0 /* SceneDelegate.swift in Sources */,
 				A44D32B72332944B0052A2FC /* LeetCodeSessionStorage.swift in Sources */,
