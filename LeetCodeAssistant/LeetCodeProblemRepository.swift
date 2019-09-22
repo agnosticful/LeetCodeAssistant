@@ -1,5 +1,21 @@
 import Foundation
 
+struct JsonData: Codable {
+    let data: Data
+    
+    struct Data: Codable {
+        let question: Question
+        
+        struct Question: Codable {
+            let questionId: String
+            let title: String
+            let titleSlug: String
+            let content: String
+            
+        }
+    }
+}
+
 class LeetCodeProblemRepository {
     var sessionToken: String?
     
@@ -103,6 +119,37 @@ class LeetCodeProblemRepository {
             }.resume()
         }
     }
+
+func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void) {
+    
+    getCsrfToken { (csrfToken, error) in
+        guard let csrfToken = csrfToken else {
+            return
+        }
+        var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
+
+        request.allHTTPHeaderFields = [
+            "content-type": "application/json",
+            "x-csrftoken": csrfToken,
+        ]
+        
+        request.httpMethod = "POST"
+        
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n        questionId\\n        questionFrontendId\\n        boundTopicId\\n        title\\n        titleSlug\\n        content\\n    }\\n}\"}".data(using: .utf8)
+        
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            guard let data = data else {
+                print(error?.localizedDescription ?? "No data")
+                return
+            }
+            
+            let jsonData = try! JSONDecoder().decode(JsonData.self, from: data)
+            
+            completion("\(jsonData.data.question.content)")
+        }.resume()
+    }
+}
+    
     
     private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
         URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
@@ -165,7 +212,7 @@ class LeetCodeProblemRepository {
                     assertionFailure()
                 }
                 
-                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title)
+                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title, description: "")
                 
                 var status: UserLeetCodeProblemStatus!
                 
@@ -205,6 +252,7 @@ class LeetCodeProblemRepository {
             var number: Int
             var difficulty: LeetCodeProblemDifficuly
             var title: String
+            var description: String
         }
     }
     

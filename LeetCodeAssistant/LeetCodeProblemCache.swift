@@ -38,12 +38,14 @@ struct CodableLeetCodeProblem: LeetCodeProblem, Codable {
     var number: Int
     var difficulty: LeetCodeProblemDifficuly
     var title: String
+    var description: String
     
     init(from noncodable: LeetCodeProblem) {
         id = noncodable.id
         number = noncodable.number
         difficulty = noncodable.difficulty
         title = noncodable.title
+        description = ""
     }
     
     init(from decoder: Decoder) throws {
@@ -53,6 +55,7 @@ struct CodableLeetCodeProblem: LeetCodeProblem, Codable {
         id = try container.decode(String.self, forKey: .id)
         number = try container.decode(Int.self, forKey: .number)
         title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
         
         switch difficultyString {
         case "EASY":
@@ -92,6 +95,7 @@ struct CodableLeetCodeProblem: LeetCodeProblem, Codable {
         case number = "number"
         case difficulty = "difficulty"
         case title = "title"
+        case description = "description"
     }
 }
 

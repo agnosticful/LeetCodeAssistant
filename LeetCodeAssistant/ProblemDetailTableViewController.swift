@@ -28,6 +28,14 @@ class ProblemDetailTableViewController: UITableViewController {
                 self.tableView.reloadData()
             }
         }
+        
+//        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.title) { (content) in
+//            self.problem.description = content
+//        }
+        
+        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: "two-sum") { (content) in
+            self.problem.description = content
+        }
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -216,7 +224,7 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
     func set(problem: LeetCodeProblem) {
-        textLabel?.text = "qwekjqwlejqlkwjelkqjwelk"
+        textLabel?.text = problem.description
     }
 }
 
