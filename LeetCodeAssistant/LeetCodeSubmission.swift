@@ -1,6 +1,7 @@
 import Foundation
 
 protocol LeetCodeSubmission {
+    var id: Int { get }
     var status: LeetCodeSubmissionStatus { get }
     var submittedAt: Date { get }
     var usedLanguage: String { get }

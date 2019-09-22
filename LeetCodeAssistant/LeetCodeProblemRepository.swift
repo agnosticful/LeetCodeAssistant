@@ -249,6 +249,7 @@ fileprivate struct LeetCodeSubmissionAPIJSON: Decodable {
 }
 
 fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
+    var id: Int
     var status: LeetCodeSubmissionStatus
     var submittedAt: Date
     var usedLanguage: String
@@ -257,9 +258,11 @@ fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let idString = try container.decode(String.self, forKey: .id)
         let statusString = try container.decode(String.self, forKey: .statusString)
         let submissionTimestamp = try container.decode(String.self, forKey: .submissionTimestamp)
 
+        id = Int(idString)!
         usedLanguage = sanitizeUsedLanguage(try container.decode(String.self, forKey: .usedLanguage))
         runtime = sanitizeRuntime(try container.decode(String.self, forKey: .runtimeDurationString))
         memoryUsage = sanitizeMemoryUsage(try container.decode(String.self, forKey: .usedMemoryString))
@@ -279,6 +282,7 @@ fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
     }
     
     private enum CodingKeys: String, CodingKey {
+        case id = "id"
         case statusString = "statusDisplay"
         case usedLanguage = "lang"
         case runtimeDurationString = "runtime"
