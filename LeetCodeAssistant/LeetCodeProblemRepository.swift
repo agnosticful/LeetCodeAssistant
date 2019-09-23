@@ -119,7 +119,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
         
         request.httpMethod = "POST"
         
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n        questionId\\n        title\\n        titleSlug\\n        content\\n    }\\n}\"}".data(using: .utf8)
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"two-sum\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
@@ -127,7 +127,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
                 return
             }
             
-            let jsonData = try! JSONDecoder().decode(JsonData.self, from: data)
+            let jsonData = try! JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data)
             
             completion("\(jsonData.data.question.content)")
         }.resume()
@@ -240,7 +240,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
         }
     }
     
-    private struct JsonData: Codable {
+    private struct LeetCodeDetailAPIAllJSON: Codable {
         let data: Data
         
         struct Data: Codable {
@@ -249,8 +249,11 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
             struct Question: Codable {
                 let questionId: String
                 let title: String
-                let titleSlug: String
                 let content: String
+                let likes: Int
+                let dislikes: Int
+                let similarQuestions: String
+                let stats: String
                 
             }
         }

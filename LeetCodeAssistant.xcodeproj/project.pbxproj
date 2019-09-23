@@ -21,6 +21,7 @@
 		A4E92CB0232DABAB00F939C0 /* ProblemDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92CAF232DABAB00F939C0 /* ProblemDetailTableViewController.swift */; };
 		A4E92CB2232DADB300F939C0 /* LeetCodeSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E92CB1232DADB300F939C0 /* LeetCodeSubmission.swift */; };
 		A4F4DDBE232EA83300A8D5F9 /* LeetCodeProblemRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F4DDBD232EA83300A8D5F9 /* LeetCodeProblemRepository.swift */; };
+		D94BC09923393CA900A6541A /* LeetCodeProblemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94BC09823393CA900A6541A /* LeetCodeProblemDetail.swift */; };
 		D9BDD66123375BD800A2D6A9 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BDD66023375BD800A2D6A9 /* Utility.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 		A4E92CAF232DABAB00F939C0 /* ProblemDetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProblemDetailTableViewController.swift; sourceTree = "<group>"; };
 		A4E92CB1232DADB300F939C0 /* LeetCodeSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeSubmission.swift; sourceTree = "<group>"; };
 		A4F4DDBD232EA83300A8D5F9 /* LeetCodeProblemRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeetCodeProblemRepository.swift; sourceTree = "<group>"; };
+		D94BC09823393CA900A6541A /* LeetCodeProblemDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeetCodeProblemDetail.swift; sourceTree = "<group>"; };
 		D9BDD66023375BD800A2D6A9 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -85,6 +87,7 @@
 				A44D32B62332944B0052A2FC /* LeetCodeSessionStorage.swift */,
 				A4E92CAB232D83C100F939C0 /* ProblemListTableViewController.swift */,
 				A4E92CAD232D8C7F00F939C0 /* LeetCodeProblem.swift */,
+				D94BC09823393CA900A6541A /* LeetCodeProblemDetail.swift */,
 				A4E92CB1232DADB300F939C0 /* LeetCodeSubmission.swift */,
 				A4E92C9E232D806400F939C0 /* Assets.xcassets */,
 				A4E92CA0232D806400F939C0 /* LaunchScreen.storyboard */,
@@ -168,6 +171,7 @@
 				A4F4DDBE232EA83300A8D5F9 /* LeetCodeProblemRepository.swift in Sources */,
 				A4E92CAC232D83C100F939C0 /* ProblemListTableViewController.swift in Sources */,
 				A4E92CB2232DADB300F939C0 /* LeetCodeSubmission.swift in Sources */,
+				D94BC09923393CA900A6541A /* LeetCodeProblemDetail.swift in Sources */,
 				A467F71B233406AB00911B78 /* LeetCodeProblemCache.swift in Sources */,
 				A4E92CAA232D836F00F939C0 /* ProblemListTableViewCell.swift in Sources */,
 				A4E92CB0232DABAB00F939C0 /* ProblemDetailTableViewController.swift in Sources */,
