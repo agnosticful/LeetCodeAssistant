@@ -241,11 +241,7 @@ class ProblemDetailTableViewDescriptionCell: UITableViewCell {
 
 class ProblemDetailTableViewLastSubmissionCell: UITableViewCell {
     func set(problem: LeetCodeProblem, code: String?) {
-        guard let code = code else {
-            textLabel?.text = "No submission"
-            
-            return
-        }
+        guard let code = code else { return }
         
         textLabel?.text = code
     }
