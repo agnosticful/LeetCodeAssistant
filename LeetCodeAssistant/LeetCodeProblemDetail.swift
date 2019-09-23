@@ -10,7 +10,7 @@ import Foundation
 
 
 protocol LeetCodeProblemDetail {
-    var id: String { get }
+    var questionId: String { get }
     var title: String { get }
     var content: String { get }
 //    var isPaidOnly: bool { get }
