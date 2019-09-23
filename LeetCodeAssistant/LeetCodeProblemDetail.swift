@@ -9,6 +9,14 @@
 import Foundation
 
 
-struct LeetCodeProblemDetail {
-    
+protocol LeetCodeProblemDetail {
+    var id: String { get }
+    var title: String { get }
+    var content: String { get }
+    var isPaidOnly: bool { get }
+    var likes: Int { get }
+    var dislikes: Int { get }
+    var isLiked: bool { get }
+    var similarQuestions: String { get }
+    var stats: String { get }
 }
