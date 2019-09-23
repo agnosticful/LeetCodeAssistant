@@ -104,7 +104,7 @@ class LeetCodeProblemRepository {
         }
     }
 
-func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void) {
+func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemDetail) -> Void) {
     
     getCsrfToken { (csrfToken, error) in
         guard let csrfToken = csrfToken else {
@@ -119,7 +119,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
         
         request.httpMethod = "POST"
         
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"two-sum\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
@@ -129,7 +129,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
             
             let jsonData = try! JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data)
             
-            completion("\(jsonData.data.question.content)")
+            completion(jsonData.data.question)
         }.resume()
     }
 }
@@ -246,7 +246,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (String) -> Void)
         struct Data: Codable {
             let question: Question
             
-            struct Question: Codable {
+            struct Question: LeetCodeProblemDetail, Codable {
                 let questionId: String
                 let title: String
                 let content: String

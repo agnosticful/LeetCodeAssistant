@@ -2,6 +2,7 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
+    var problemDetail: LeetCodeProblemDetail!
     var submissions: [LeetCodeSubmission]?
     var isSubmissionLoading = false
     var lastBestSubmission: LeetCodeSubmission?
@@ -29,7 +30,10 @@ class ProblemDetailTableViewController: UITableViewController {
             }
         }
         
-        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (content) in self.problem.description = content.replaceHtmlTag()
+        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (problemDetail) in
+            
+            self.problemDetail = problemDetail
+            self.problem.description = self.problemDetail.content.replaceHtmlTag()
         }
     }
 
