@@ -13,3 +13,5 @@ enum LeetCodeSubmissionStatus {
     case accepted
     case failed
 }
+
+typealias LeetCodeSubmissionCode = String

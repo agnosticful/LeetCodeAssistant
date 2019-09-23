@@ -104,6 +104,51 @@ class LeetCodeProblemRepository {
         }
     }
     
+    func getSubmittedCode(of submission: LeetCodeSubmission, completion: @escaping (LeetCodeSubmissionCode?, Error?) -> Void) {
+        getCsrfToken { (csrfToken, error) in
+            guard let csrfToken = csrfToken else {
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort)
+            }
+
+            var request = URLRequest(url: URL(string: "https://leetcode.com/submissions/detail/\(submission.id)/")!)
+            request.allHTTPHeaderFields = [
+                "referer": "https://leetcode.com/problems/",
+                "cookie": "csrftoken=\(csrfToken);LEETCODE_SESSION=\(self.sessionToken!)",
+            ]
+
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    return completion(nil, LeetCodeSubmissionAPIError.noPreciseResponseReturned)
+                }
+
+                guard let body = String(data: data, encoding: .utf8) else {
+                    return completion(nil, LeetCodeSubmissionAPIError.jsonDecodeFailed)
+                }
+                
+                let regexForCode = try! NSRegularExpression(pattern: "',\\n *submissionCode: '(.+)',\\n *editCodeUrl: *'\\/problems\\/")
+                let firstMathInHTML = regexForCode.firstMatch(in: body, options: [], range: NSRange(location: 0, length: body.utf16.count))
+                var code = String(body[Range(firstMathInHTML!.range(at: 1), in: body)!])
+                
+                let regexForEncodedCharactor = try! NSRegularExpression(pattern: "\\\\u[0-9A-F]{4}")
+                let encodedCharactorMatches = regexForEncodedCharactor.matches(in: code, options: [], range: NSRange(location: 0, length: code.utf16.count))
+                
+                var offset = 0
+                
+                for match in encodedCharactorMatches {
+                    let range = code.index(code.startIndex, offsetBy: match.range.location + offset)..<code.index(code.startIndex, offsetBy: match.range.location + match.range.length + offset)
+                    let hexPart = code[code.index(range.lowerBound, offsetBy: 2)..<range.upperBound]
+                    let decodedCharacter = Unicode.Scalar(UInt16(hexPart, radix: 16)!)!
+
+                    code = code.replacingCharacters(in: range, with: String(decodedCharacter))
+                    
+                    offset -= 5
+                }
+
+                completion(code, nil)
+            }.resume()
+        }
+    }
+    
     private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
         URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
             let response = response as! HTTPURLResponse
