@@ -17,7 +17,7 @@ class ProblemDetailTableViewController: UITableViewController {
         isLastBestSubmission = true
         tableView.reloadData()
         
-        LeetCodeProblemRepository.shared.getProblemDetail(id: problem.id) { (problemDetail) in
+        LeetCodeProblemRepository.shared.getProblemDetail(id: problem.id) { (problemDetail, eeror) in
             
             self.problemDetail = problemDetail
             

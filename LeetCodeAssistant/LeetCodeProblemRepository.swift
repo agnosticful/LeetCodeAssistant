@@ -104,11 +104,11 @@ class LeetCodeProblemRepository {
         }
     }
 
-func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail) -> Void) {
+func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?, Error?) -> Void) {
     
     getCsrfToken { (csrfToken, error) in
         guard let csrfToken = csrfToken else {
-            return
+            return completion(nil, LeetCodeAPIConnectionError.networkAbort)
         }
         var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
 
@@ -123,13 +123,14 @@ func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail) 
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
-                print(error?.localizedDescription ?? "No data")
-                return
+                return completion(nil, LeetCodeProblemDetailAPIError.noDetailDataReturned)
             }
             
-            let leetCodeDetailAPIAllJSON = try! JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data)
+            guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
+                return completion(nil, LeetCodeProblemDetailAPIError.jsonDecodeFailed)
+            }
             
-            completion(leetCodeDetailAPIAllJSON.data.question)
+            completion(leetCodeDetailAPIAllJSON.data.question, nil)
         }.resume()
     }
 }
@@ -271,6 +272,11 @@ enum LeetCodeAPIConnectionError: Error {
 
 enum LeetCodeSubmissionAPIError: Error {
     case noPreciseResponseReturned
+    case jsonDecodeFailed
+}
+
+enum LeetCodeProblemDetailAPIError: Error {
+    case noDetailDataReturned
     case jsonDecodeFailed
 }
 
