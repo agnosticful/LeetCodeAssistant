@@ -17,6 +17,17 @@ class ProblemDetailTableViewController: UITableViewController {
         isLastBestSubmission = true
         tableView.reloadData()
         
+        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (problemDetail) in
+            
+            self.problemDetail = problemDetail
+            self.problem.description = self.problemDetail.content.replaceHtmlTag()
+            
+            DispatchQueue.main.async {
+                self.isProblemDetailLoading = false
+                self.tableView.reloadData()
+            }
+        }
+        
         LeetCodeProblemRepository.shared.getAllSubmissions(of: problem!) { (submissions, error) in
             guard let submissions = submissions else {
                 return
@@ -28,17 +39,6 @@ class ProblemDetailTableViewController: UITableViewController {
             DispatchQueue.main.async {
                 self.isSubmissionLoading = false
                 self.isLastBestSubmission = false
-                self.tableView.reloadData()
-            }
-        }
-        
-        LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (problemDetail) in
-            
-            self.problemDetail = problemDetail
-            self.problem.description = self.problemDetail.content.replaceHtmlTag()
-            
-            DispatchQueue.main.async {
-                self.isProblemDetailLoading = false
                 self.tableView.reloadData()
             }
         }
