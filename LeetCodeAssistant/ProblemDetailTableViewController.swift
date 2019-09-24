@@ -20,7 +20,6 @@ class ProblemDetailTableViewController: UITableViewController {
         LeetCodeProblemRepository.shared.getProblemDetail(titleSlug: problem.id) { (problemDetail) in
             
             self.problemDetail = problemDetail
-            self.problem.description = self.problemDetail.content.replaceHtmlTag()
             
             DispatchQueue.main.async {
                 self.isProblemDetailLoading = false

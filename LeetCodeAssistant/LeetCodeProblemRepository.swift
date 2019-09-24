@@ -196,7 +196,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemD
                     assertionFailure()
                 }
                 
-                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title, description: "")
+                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title)
                 
                 var status: UserLeetCodeProblemStatus!
                 
@@ -236,7 +236,6 @@ func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemD
             var number: Int
             var difficulty: LeetCodeProblemDifficuly
             var title: String
-            var description: String
         }
     }
     
