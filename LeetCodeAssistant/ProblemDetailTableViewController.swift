@@ -233,7 +233,7 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
     func set(problemDetail: LeetCodeProblemDetail) {
-        textLabel?.text = problemDetail.content.replaceHtmlTag()
+        textLabel?.text = problemDetail.content.removeHtmlTag()
     }
 }
 
