@@ -1,11 +1,3 @@
-//
-//  Utility.swift
-//  LeetCodeAssistant
-//
-//  Created by Ryo Togashi on 2019-09-22.
-//  Copyright © 2019 Kohei Asai. All rights reserved.
-//
-
 import Foundation
 
 extension String {
@@ -16,4 +8,3 @@ extension String {
     
 }
 
-//  (?!<\\(>|\\s[^>]*>))<("[^"]*"|\\\'[^\\\']*\\\'|[^\\\'">])*>
