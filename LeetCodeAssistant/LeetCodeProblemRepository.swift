@@ -104,7 +104,7 @@ class LeetCodeProblemRepository {
         }
     }
 
-func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemDetail) -> Void) {
+func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail) -> Void) {
     
     getCsrfToken { (csrfToken, error) in
         guard let csrfToken = csrfToken else {
@@ -119,7 +119,7 @@ func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemD
         
         request.httpMethod = "POST"
         
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(titleSlug)\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
@@ -127,9 +127,9 @@ func getProblemDetail(titleSlug: String, completion: @escaping (LeetCodeProblemD
                 return
             }
             
-            let jsonData = try! JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data)
+            let leetCodeDetailAPIAllJSON = try! JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data)
             
-            completion(jsonData.data.question)
+            completion(leetCodeDetailAPIAllJSON.data.question)
         }.resume()
     }
 }
