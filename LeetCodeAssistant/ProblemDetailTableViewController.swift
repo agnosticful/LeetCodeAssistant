@@ -3,6 +3,7 @@ import UIKit
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
     var problemDetail: LeetCodeProblemDetail!
+    var isProblemDetailLoading = false
     var submissions: [LeetCodeSubmission]?
     var isSubmissionLoading = false
     var lastBestSubmission: LeetCodeSubmission?
@@ -12,6 +13,7 @@ class ProblemDetailTableViewController: UITableViewController {
         super.viewDidLoad()
 
         isSubmissionLoading = true
+        isProblemDetailLoading = true
         isLastBestSubmission = true
         tableView.reloadData()
         
@@ -34,6 +36,11 @@ class ProblemDetailTableViewController: UITableViewController {
             
             self.problemDetail = problemDetail
             self.problem.description = self.problemDetail.content.replaceHtmlTag()
+            
+            DispatchQueue.main.async {
+                self.isProblemDetailLoading = false
+                self.tableView.reloadData()
+            }
         }
     }
 
@@ -124,9 +131,13 @@ class ProblemDetailTableViewController: UITableViewController {
             
             return cell
         case (1, 0):
+            if isProblemDetailLoading {
+                return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
+            }
+            
             let cell = tableView.dequeueReusableCell(withIdentifier: "DescriptionCell")! as! ProblemDetailTableViewDescriptionCell
             
-            cell.set(problem: problem)
+            cell.set(problemDetail: problemDetail)
             
             return cell
         case (2, 0):
@@ -222,8 +233,8 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 }
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
-    func set(problem: LeetCodeProblem) {
-        textLabel?.text = problem.description
+    func set(problemDetail: LeetCodeProblemDetail) {
+        textLabel?.text = problemDetail.content.replaceHtmlTag()
     }
 }
 
