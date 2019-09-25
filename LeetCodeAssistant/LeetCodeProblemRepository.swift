@@ -103,38 +103,35 @@ class LeetCodeProblemRepository {
             }.resume()
         }
     }
-
-func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?, Error?) -> Void) {
     
-    getCsrfToken { (csrfToken, error) in
-        guard let csrfToken = csrfToken else {
-            return completion(nil, LeetCodeAPIConnectionError.networkAbort)
+    func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?, Error?) -> Void) {
+        
+        getCsrfToken { (csrfToken, error) in
+            guard let csrfToken = csrfToken else {
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort)
+            }
+            var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
+
+            request.allHTTPHeaderFields = [
+                "content-type": "application/json",
+                "x-csrftoken": csrfToken,
+            ]
+            request.httpMethod = "POST"
+            request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    content\\n    }\\n}\"}".data(using: .utf8)
+            
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    return completion(nil, LeetCodeProblemDetailAPIError.noDetailDataReturned)
+                }
+                
+                guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
+                    return completion(nil, LeetCodeProblemDetailAPIError.jsonDecodeFailed)
+                }
+                
+                completion(leetCodeDetailAPIAllJSON.data.question, nil)
+            }.resume()
         }
-        var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
-
-        request.allHTTPHeaderFields = [
-            "content-type": "application/json",
-            "x-csrftoken": csrfToken,
-        ]
-        
-        request.httpMethod = "POST"
-        
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    content\\n    }\\n}\"}".data(using: .utf8)
-        
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            guard let data = data else {
-                return completion(nil, LeetCodeProblemDetailAPIError.noDetailDataReturned)
-            }
-            
-            guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
-                return completion(nil, LeetCodeProblemDetailAPIError.jsonDecodeFailed)
-            }
-            
-            completion(leetCodeDetailAPIAllJSON.data.question, nil)
-        }.resume()
     }
-}
-    
     
     private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
         URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
