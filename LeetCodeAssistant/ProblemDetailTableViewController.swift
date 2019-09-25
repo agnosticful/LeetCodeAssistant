@@ -2,20 +2,28 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
-    var submissions: [LeetCodeSubmission]?
-    var isSubmissionLoading = false
-    var lastBestSubmission: LeetCodeSubmission?
-    var isLastBestSubmission = false
+    private var submissions: [LeetCodeSubmission]?
+    private var isSubmissionLoading = false
+    private var lastBestSubmission: LeetCodeSubmission?
+    private var lastBestSubmissionCode: String?
+    private var isLastBestSubmissionCodeLoading = false
+    private var isNoSubmission: Bool {
+        get { return !isSubmissionLoading && lastBestSubmission == nil }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         isSubmissionLoading = true
-        isLastBestSubmission = true
+        isLastBestSubmissionCodeLoading = true
         tableView.reloadData()
         
         LeetCodeProblemRepository.shared.getAllSubmissions(of: problem!) { (submissions, error) in
+            self.isSubmissionLoading = false
+
             guard let submissions = submissions else {
+                self.tableView.reloadData()
+                
                 return
             }
             
@@ -23,15 +31,24 @@ class ProblemDetailTableViewController: UITableViewController {
             self.lastBestSubmission = submissions.first { $0.status == .accepted } ?? submissions.first
             
             DispatchQueue.main.async {
-                self.isSubmissionLoading = false
-                self.isLastBestSubmission = false
                 self.tableView.reloadData()
+            }
+            
+            if let submission = self.lastBestSubmission {
+                LeetCodeProblemRepository.shared.getSubmittedCode(of: submission) { (code, error) in
+                    self.lastBestSubmissionCode = code
+                    self.isLastBestSubmissionCodeLoading = false
+                    
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                }
             }
         }
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        if !isSubmissionLoading && submissions == nil {
+        if isNoSubmission {
             return 2
         }
 
@@ -45,7 +62,7 @@ class ProblemDetailTableViewController: UITableViewController {
         case 1:
             return 1
         case 2:
-            return 1
+            return isNoSubmission ? 0 : 1
         case 3:
             if isSubmissionLoading {
                 return 1
@@ -80,11 +97,9 @@ class ProblemDetailTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         switch section {
+        case 1:
+            return isNoSubmission ? "You've never submitted to this problem." : nil
         case 2:
-            if isSubmissionLoading {
-                return nil
-            }
-            
             if let submission = lastBestSubmission {
                 return "Written in \(submission.usedLanguage). Took \(submission.runtime) and \(submission.memoryUsage) RAM to finish."
             }
@@ -123,9 +138,13 @@ class ProblemDetailTableViewController: UITableViewController {
             
             return cell
         case (2, 0):
+            if isLastBestSubmissionCodeLoading {
+                return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
+            }
+            
             let cell = tableView.dequeueReusableCell(withIdentifier: "LastSubmissionCell")! as! ProblemDetailTableViewLastSubmissionCell
             
-            cell.set(problem: problem)
+            cell.set(problem: problem, code: lastBestSubmissionCode)
             
             return cell
         case (3, _):
@@ -221,8 +240,10 @@ class ProblemDetailTableViewDescriptionCell: UITableViewCell {
 }
 
 class ProblemDetailTableViewLastSubmissionCell: UITableViewCell {
-    func set(problem: LeetCodeProblem) {
-        textLabel?.text = "code"
+    func set(problem: LeetCodeProblem, code: String?) {
+        guard let code = code else { return }
+        
+        textLabel?.text = code
     }
 }
 
