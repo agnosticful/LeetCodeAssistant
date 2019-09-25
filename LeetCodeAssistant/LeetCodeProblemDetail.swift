@@ -1,6 +1,5 @@
 import Foundation
 
-
 protocol LeetCodeProblemDetail {
     var questionId: String { get }
     var title: String { get }
