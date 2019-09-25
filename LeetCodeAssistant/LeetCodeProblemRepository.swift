@@ -119,7 +119,7 @@ func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?,
         
         request.httpMethod = "POST"
         
-        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    questionId\\n    title\\n    content\\n    likes\\n    dislikes\\n    similarQuestions\\n    stats\\n    }\\n}\"}".data(using: .utf8)
+        request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    content\\n    }\\n}\"}".data(using: .utf8)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
@@ -242,19 +242,10 @@ func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?,
     
     private struct LeetCodeDetailAPIAllJSON: Codable {
         let data: Data
-        
         struct Data: Codable {
             let question: Question
-            
             struct Question: LeetCodeProblemDetail, Codable {
-                let questionId: String
-                let title: String
                 let content: String
-                let likes: Int
-                let dislikes: Int
-                let similarQuestions: String
-                let stats: String
-                
             }
         }
     }
