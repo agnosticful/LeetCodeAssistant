@@ -18,7 +18,6 @@ class ProblemDetailTableViewController: UITableViewController {
         tableView.reloadData()
         
         LeetCodeProblemRepository.shared.getProblemDetail(id: problem.id) { (problemDetail, eeror) in
-            
             self.problemDetail = problemDetail
             
             DispatchQueue.main.async {
