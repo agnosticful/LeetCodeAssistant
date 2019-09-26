@@ -237,12 +237,21 @@ class LeetCodeProblemRepository {
         }
     }
     
-    private struct LeetCodeDetailAPIAllJSON: Codable {
+    private struct LeetCodeDetailAPIAllJSON: Decodable {
         let data: Data
-        struct Data: Codable {
+        struct Data: Decodable {
             let question: Question
-            struct Question: LeetCodeProblemDetail, Codable {
+            struct Question: LeetCodeProblemDetail, Decodable {
                 let content: String
+                
+                init(from decoder: Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    content = try container.decode(String.self, forKey: .content).removeHtmlTag()
+                }
+                
+                private enum CodingKeys: String, CodingKey {
+                    case content = "content"
+                }
             }
         }
     }
@@ -357,4 +366,10 @@ fileprivate func sanitizeMemoryUsage(_ memoryUsage: String) -> String {
     }
     
     return memoryUsage
+}
+
+fileprivate extension String {
+    func removeHtmlTag() -> String {
+        return replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: self.range(of: self)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
+    }
 }

@@ -232,7 +232,7 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
     func set(problemDetail: LeetCodeProblemDetail) {
-        textLabel?.text = problemDetail.content.removeHtmlTag()
+        textLabel?.text = problemDetail.content
     }
 }
 
@@ -261,11 +261,5 @@ class ProblemDetailTableViewSubmissionCell: UITableViewCell {
         dateFormatter.doesRelativeDateFormatting = true
 
         detailTextLabel?.text = "\(submission.usedLanguage) • \(submission.runtime) • \(submission.memoryUsage) • \(dateFormatter.string(from: submission.submittedAt))"
-    }
-}
-
-fileprivate extension String {
-    func removeHtmlTag() -> String {
-        return replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: self.range(of: self)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
     }
 }
