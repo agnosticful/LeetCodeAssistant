@@ -2,8 +2,8 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
-    var problemDetail: LeetCodeProblemDescription!
-    var isProblemDetailLoading = false
+    var problemDescription: LeetCodeProblemDescription!
+    var isproblemDescriptionLoading = false
     private var submissions: [LeetCodeSubmission]?
     private var isSubmissionLoading = false
     private var lastBestSubmission: LeetCodeSubmission?
@@ -17,15 +17,15 @@ class ProblemDetailTableViewController: UITableViewController {
         super.viewDidLoad()
 
         isSubmissionLoading = true
-        isProblemDetailLoading = true
+        isproblemDescriptionLoading = true
         isLastBestSubmissionCodeLoading = true
         tableView.reloadData()
         
-        LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDetail, error) in
-            self.problemDetail = problemDetail
+        LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDescription, error) in
+            self.problemDescription = problemDescription
             
             DispatchQueue.main.async {
-                self.isProblemDetailLoading = false
+                self.isproblemDescriptionLoading = false
                 self.tableView.reloadData()
             }
         }
@@ -144,13 +144,13 @@ class ProblemDetailTableViewController: UITableViewController {
             
             return cell
         case (1, 0):
-            if isProblemDetailLoading {
+            if isproblemDescriptionLoading {
                 return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
             }
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "DescriptionCell")! as! ProblemDetailTableViewDescriptionCell
             
-            cell.set(problemDetail: problemDetail)
+            cell.set(problemDescription: problemDescription)
             
             return cell
         case (2, 0):
@@ -250,8 +250,8 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 }
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
-    func set(problemDetail: LeetCodeProblemDescription) {
-        textLabel?.text = problemDetail.content
+    func set(problemDescription: LeetCodeProblemDescription) {
+        textLabel?.text = problemDescription
     }
 }
 

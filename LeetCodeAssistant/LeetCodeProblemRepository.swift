@@ -174,7 +174,7 @@ class LeetCodeProblemRepository {
                     return completion(nil, LeetCodeProblemDescriptionAPIError.jsonDecodeFailed)
                 }
                 
-                completion(leetCodeDetailAPIAllJSON.data.question, nil)
+                completion(leetCodeDetailAPIAllJSON.data.question.content, nil)
             }.resume()
         }
     }
@@ -287,8 +287,8 @@ class LeetCodeProblemRepository {
         let data: Data
         struct Data: Decodable {
             let question: Question
-            struct Question: LeetCodeProblemDescription, Decodable {
-                let content: String
+            struct Question: Decodable {
+                let content: LeetCodeProblemDescription
                 
                 init(from decoder: Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
