@@ -167,11 +167,11 @@ class LeetCodeProblemRepository {
             
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    return completion(nil, LeetCodeProblemDetailAPIError.noDetailDataReturned)
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.noDescriptionDataReturned)
                 }
                 
                 guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
-                    return completion(nil, LeetCodeProblemDetailAPIError.jsonDecodeFailed)
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.jsonDecodeFailed)
                 }
                 
                 completion(leetCodeDetailAPIAllJSON.data.question, nil)
@@ -318,8 +318,8 @@ enum LeetCodeSubmissionAPIError: Error {
     case jsonDecodeFailed
 }
 
-enum LeetCodeProblemDetailAPIError: Error {
-    case noDetailDataReturned
+enum LeetCodeProblemDescriptionAPIError: Error {
+    case noDescriptionDataReturned
     case jsonDecodeFailed
 }
 
