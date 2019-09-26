@@ -174,7 +174,7 @@ class LeetCodeProblemRepository {
                     return completion(nil, LeetCodeProblemDescriptionAPIError.jsonDecodeFailed)
                 }
                 
-                completion(leetCodeDetailAPIAllJSON.data.question.content, nil)
+                completion(leetCodeDetailAPIAllJSON.content, nil)
             }.resume()
         }
     }
@@ -284,22 +284,27 @@ class LeetCodeProblemRepository {
     }
     
     private struct LeetCodeDetailAPIAllJSON: Decodable {
-        let data: Data
-        struct Data: Decodable {
-            let question: Question
-            struct Question: Decodable {
-                let content: LeetCodeProblemDescription
-                
-                init(from decoder: Decoder) throws {
-                    let container = try decoder.container(keyedBy: CodingKeys.self)
-                    let contentWithHtmlTag = try container.decode(String.self, forKey: .content)
-                    content = removeHtmlTag(contentWithHtmlTag)
-                }
-                
-                private enum CodingKeys: String, CodingKey {
-                    case content = "content"
-                }
-            }
+        let content: LeetCodeProblemDescription
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let questionContainer = try container.nestedContainer(keyedBy: QuestionCodingKeys.self, forKey: .data)
+            let descriptionContent = try questionContainer.nestedContainer(keyedBy:  DescriptionCodingKeys.self, forKey: .question)
+            let contentWithHtmlTag = try descriptionContent.decode(LeetCodeProblemDescription.self, forKey: .content)
+            
+            content = removeHtmlTag(contentWithHtmlTag)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case data = "data"
+        }
+        
+        private enum QuestionCodingKeys: String, CodingKey {
+            case question = "question"
+        }
+        
+        private enum DescriptionCodingKeys: String, CodingKey {
+            case content = "content"
         }
     }
     
