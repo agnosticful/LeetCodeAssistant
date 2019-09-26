@@ -150,7 +150,7 @@ class LeetCodeProblemRepository {
     }
     
     
-    func getProblemDetail(id: String, completion: @escaping (LeetCodeProblemDetail?, Error?) -> Void) {
+    func getProblemDescription(id: String, completion: @escaping (LeetCodeProblemDescription?, Error?) -> Void) {
         
         getCsrfToken { (csrfToken, error) in
             guard let csrfToken = csrfToken else {
@@ -287,7 +287,7 @@ class LeetCodeProblemRepository {
         let data: Data
         struct Data: Decodable {
             let question: Question
-            struct Question: LeetCodeProblemDetail, Decodable {
+            struct Question: LeetCodeProblemDescription, Decodable {
                 let content: String
                 
                 init(from decoder: Decoder) throws {

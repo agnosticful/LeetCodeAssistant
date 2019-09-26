@@ -2,7 +2,7 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
-    var problemDetail: LeetCodeProblemDetail!
+    var problemDetail: LeetCodeProblemDescription!
     var isProblemDetailLoading = false
     private var submissions: [LeetCodeSubmission]?
     private var isSubmissionLoading = false
@@ -21,7 +21,7 @@ class ProblemDetailTableViewController: UITableViewController {
         isLastBestSubmissionCodeLoading = true
         tableView.reloadData()
         
-        LeetCodeProblemRepository.shared.getProblemDetail(id: problem.id) { (problemDetail, error) in
+        LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDetail, error) in
             self.problemDetail = problemDetail
             
             DispatchQueue.main.async {
@@ -250,7 +250,7 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 }
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
-    func set(problemDetail: LeetCodeProblemDetail) {
+    func set(problemDetail: LeetCodeProblemDescription) {
         textLabel?.text = problemDetail.content
     }
 }
