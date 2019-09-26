@@ -149,6 +149,36 @@ class LeetCodeProblemRepository {
         }
     }
     
+    
+    func getProblemDescription(id: String, completion: @escaping (LeetCodeProblemDescription?, Error?) -> Void) {
+        
+        getCsrfToken { (csrfToken, error) in
+            guard let csrfToken = csrfToken else {
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort)
+            }
+            var request = URLRequest(url: URL(string: "https://leetcode.com/graphql")!)
+
+            request.allHTTPHeaderFields = [
+                "content-type": "application/json",
+                "x-csrftoken": csrfToken,
+            ]
+            request.httpMethod = "POST"
+            request.httpBody = "{\"query\":\"{  question(titleSlug: \\\"\(id)\\\")\\n    {\\n    content\\n    }\\n}\"}".data(using: .utf8)
+            
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
+                guard let data = data else {
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.noDescriptionDataReturned)
+                }
+                
+                guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.jsonDecodeFailed)
+                }
+                
+                completion(leetCodeDetailAPIAllJSON.content, nil)
+            }.resume()
+        }
+    }
+    
     private func getCsrfToken(completion: @escaping (String?, Error?) -> Void) {
         URLSession.shared.dataTask(with: URL(string: "https://leetcode.com/accounts/login/")!) { (data, response, error) in
             let response = response as! HTTPURLResponse
@@ -253,6 +283,31 @@ class LeetCodeProblemRepository {
         }
     }
     
+    private struct LeetCodeDetailAPIAllJSON: Decodable {
+        let content: LeetCodeProblemDescription
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let questionContainer = try container.nestedContainer(keyedBy: QuestionCodingKeys.self, forKey: .data)
+            let descriptionContent = try questionContainer.nestedContainer(keyedBy:  DescriptionCodingKeys.self, forKey: .question)
+            let contentWithHtmlTag = try descriptionContent.decode(LeetCodeProblemDescription.self, forKey: .content)
+            
+            content = removeHtmlTag(contentWithHtmlTag)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case data = "data"
+        }
+        
+        private enum QuestionCodingKeys: String, CodingKey {
+            case question = "question"
+        }
+        
+        private enum DescriptionCodingKeys: String, CodingKey {
+            case content = "content"
+        }
+    }
+    
     static let shared = LeetCodeProblemRepository()
 }
 
@@ -266,6 +321,11 @@ enum LeetCodeAPIConnectionError: Error {
 
 enum LeetCodeSubmissionAPIError: Error {
     case noPreciseResponseReturned
+    case jsonDecodeFailed
+}
+
+enum LeetCodeProblemDescriptionAPIError: Error {
+    case noDescriptionDataReturned
     case jsonDecodeFailed
 }
 
@@ -362,4 +422,8 @@ fileprivate func sanitizeMemoryUsage(_ memoryUsage: String) -> String {
     }
     
     return memoryUsage
+}
+
+func removeHtmlTag(_ content: String) -> String {
+    return content.replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: content.range(of: content)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
 }

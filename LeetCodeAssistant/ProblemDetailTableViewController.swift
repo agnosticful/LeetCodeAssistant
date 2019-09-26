@@ -2,6 +2,8 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
+    var problemDescription: LeetCodeProblemDescription!
+    var isproblemDescriptionLoading = false
     private var submissions: [LeetCodeSubmission]?
     private var isSubmissionLoading = false
     private var lastBestSubmission: LeetCodeSubmission?
@@ -15,8 +17,18 @@ class ProblemDetailTableViewController: UITableViewController {
         super.viewDidLoad()
 
         isSubmissionLoading = true
+        isproblemDescriptionLoading = true
         isLastBestSubmissionCodeLoading = true
         tableView.reloadData()
+        
+        LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDescription, error) in
+            self.problemDescription = problemDescription
+            
+            DispatchQueue.main.async {
+                self.isproblemDescriptionLoading = false
+                self.tableView.reloadData()
+            }
+        }
         
         LeetCodeProblemRepository.shared.getAllSubmissions(of: problem!) { (submissions, error) in
             self.isSubmissionLoading = false
@@ -132,9 +144,13 @@ class ProblemDetailTableViewController: UITableViewController {
             
             return cell
         case (1, 0):
+            if isproblemDescriptionLoading {
+                return tableView.dequeueReusableCell(withIdentifier: "LoadingCell")!
+            }
+            
             let cell = tableView.dequeueReusableCell(withIdentifier: "DescriptionCell")! as! ProblemDetailTableViewDescriptionCell
             
-            cell.set(problem: problem)
+            cell.set(problemDescription: problemDescription)
             
             return cell
         case (2, 0):
@@ -234,8 +250,8 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 }
 
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
-    func set(problem: LeetCodeProblem) {
-        textLabel?.text = "qwekjqwlejqlkwjelkqjwelk"
+    func set(problemDescription: LeetCodeProblemDescription) {
+        textLabel?.text = problemDescription
     }
 }
 
