@@ -293,7 +293,7 @@ class LeetCodeProblemRepository {
                 init(from decoder: Decoder) throws {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     let contentWithHtmlTag = try container.decode(String.self, forKey: .content)
-                    content = Utility.removeHtmlTag(contentWithHtmlTag)
+                    content = removeHtmlTag(contentWithHtmlTag)
                 }
                 
                 private enum CodingKeys: String, CodingKey {
@@ -419,8 +419,6 @@ fileprivate func sanitizeMemoryUsage(_ memoryUsage: String) -> String {
     return memoryUsage
 }
 
-fileprivate struct Utility {
-    static func removeHtmlTag(_ content: String) -> String {
-        return content.replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: content.range(of: content)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
-    }
+func removeHtmlTag(_ content: String) -> String {
+    return content.replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: content.range(of: content)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
 }
