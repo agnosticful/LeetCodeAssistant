@@ -6,12 +6,11 @@ class LeetCodeProblemRepository {
     func signIn(username: String, password: String, completion: @escaping (String?, Error?) -> Void) {
         getCsrfToken { (csrfToken, _) in
             guard let csrfToken = csrfToken else {
-                return
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort);
             }
             
-            guard let encodedUsername = username.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
-                let encodedPassword = password.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
-                return
+            guard let encodedUsername = username.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed), let encodedPassword = password.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+                return completion(nil, LeetCodeSigninError.unencodableEmailOrPassword);
             }
             
             var request = URLRequest(url: URL(string: "https://leetcode.com/accounts/login/")!)
@@ -50,7 +49,7 @@ class LeetCodeProblemRepository {
     func getAllProblems(completion: @escaping ([UserLeetCodeProblem]?, Error?) -> Void) {
         getCsrfToken { (csrfToken, _) in
             guard let csrfToken = csrfToken else {
-                return
+                return completion(nil, LeetCodeAPIConnectionError.networkAbort)
             }
             
             var request = URLRequest(url: URL(string: "https://leetcode.com/api/problems/all/")!)
@@ -62,11 +61,11 @@ class LeetCodeProblemRepository {
             
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    return completion(nil, nil)
+                    return completion(nil, LeetCodeProblemAPIError.inappropriateResponse)
                 }
                 
                 guard let json = try? JSONDecoder().decode(LeetCodeAPIAllJSON.self, from: data) else {
-                    return completion(nil, nil)
+                    return completion(nil, LeetCodeProblemAPIError.inappropriateJSON)
                 }
                 
                 completion(json.problems, nil)
@@ -92,11 +91,11 @@ class LeetCodeProblemRepository {
 
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    return completion(nil, LeetCodeSubmissionAPIError.noPreciseResponseReturned)
+                    return completion(nil, LeetCodeSubmissionAPIError.inappropriateResponse)
                 }
 
                 guard let json = try? JSONDecoder().decode(LeetCodeSubmissionAPIJSON.self, from: data) else {
-                    return completion(nil, LeetCodeSubmissionAPIError.jsonDecodeFailed)
+                    return completion(nil, LeetCodeSubmissionAPIError.inappropriateJSON)
                 }
                 
                 completion(json.submissions, nil)
@@ -118,11 +117,11 @@ class LeetCodeProblemRepository {
 
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    return completion(nil, LeetCodeSubmissionAPIError.noPreciseResponseReturned)
+                    return completion(nil, LeetCodeSubmissionAPIError.inappropriateResponse)
                 }
 
                 guard let body = String(data: data, encoding: .utf8) else {
-                    return completion(nil, LeetCodeSubmissionAPIError.jsonDecodeFailed)
+                    return completion(nil, LeetCodeSubmissionAPIError.inappropriateJSON)
                 }
                 
                 let regexForCode = try! NSRegularExpression(pattern: "',\\n *submissionCode: '(.+)',\\n *editCodeUrl: *'\\/problems\\/")
@@ -167,11 +166,11 @@ class LeetCodeProblemRepository {
             
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 guard let data = data else {
-                    return completion(nil, LeetCodeProblemDescriptionAPIError.noDescriptionDataReturned)
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.inappropriateResponse)
                 }
                 
                 guard let leetCodeDetailAPIAllJSON = try? JSONDecoder().decode(LeetCodeDetailAPIAllJSON.self, from: data) else {
-                    return completion(nil, LeetCodeProblemDescriptionAPIError.jsonDecodeFailed)
+                    return completion(nil, LeetCodeProblemDescriptionAPIError.inappropriateJSON)
                 }
                 
                 completion(leetCodeDetailAPIAllJSON.content, nil)
@@ -205,128 +204,138 @@ class LeetCodeProblemRepository {
         }
     }
     
-    private struct LeetCodeAPIAllJSON: Decodable {
-        var problems: [APIUserLeetCodeProblem]
-        
-        private enum CodingKeys: String, CodingKey {
-            case problems = "stat_status_pairs"
-        }
-        
-        struct APIUserLeetCodeProblem: Decodable, UserLeetCodeProblem {
-            var problem: LeetCodeProblem
-            var status: UserLeetCodeProblemStatus
-            
-            init(from decoder: Decoder) throws {
-                let container = try decoder.container(keyedBy: CodingKeys.self)
-                let statContainer = try container.nestedContainer(keyedBy: StatCodingKeys.self, forKey: .stat)
-                let difficultyContainer = try container.nestedContainer(keyedBy: DifficultyCodingKeys.self, forKey: .difficulty)
-                
-                let id = try statContainer.decode(String.self, forKey: .id)
-                let number = try statContainer.decode(Int.self, forKey: .number)
-                let difficultyInt = try difficultyContainer.decode(Int.self, forKey: .difficulty)
-                let title = try statContainer.decode(String.self, forKey: .title)
-                let statusString = try container.decode(String?.self, forKey: .status)
-                
-                var difficulty: LeetCodeProblemDifficuly!
-                
-                switch difficultyInt {
-                case 1:
-                    difficulty = .easy
-                case 2:
-                    difficulty = .medium
-                case 3:
-                    difficulty = .hard
-                default:
-                    assertionFailure()
-                }
-                
-                problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title)
-                
-                var status: UserLeetCodeProblemStatus!
-                
-                switch statusString {
-                case "ac":
-                    status = .solved
-                case "notac":
-                    status = .attempted
-                case nil:
-                    status = .unsolved
-                default:
-                    assertionFailure()
-                }
-                
-                self.status = status
-            }
-            
-            private enum CodingKeys: String, CodingKey {
-                case stat = "stat"
-                case difficulty = "difficulty"
-                case status = "status"
-            }
-            
-            private enum StatCodingKeys: String, CodingKey {
-                case id = "question__title_slug"
-                case number = "frontend_question_id"
-                case title = "question__title"
-            }
-            
-            private enum DifficultyCodingKeys: String, CodingKey {
-                case difficulty = "level"
-            }
-        }
-        
-        struct APILeetCodeProblem: LeetCodeProblem {
-            var id: String
-            var number: Int
-            var difficulty: LeetCodeProblemDifficuly
-            var title: String
-        }
-    }
-    
-    private struct LeetCodeDetailAPIAllJSON: Decodable {
-        let content: LeetCodeProblemDescription
-        
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            let questionContainer = try container.nestedContainer(keyedBy: QuestionCodingKeys.self, forKey: .data)
-            let descriptionContent = try questionContainer.nestedContainer(keyedBy:  DescriptionCodingKeys.self, forKey: .question)
-            let contentWithHtmlTag = try descriptionContent.decode(LeetCodeProblemDescription.self, forKey: .content)
-            
-            content = removeHtmlTag(contentWithHtmlTag)
-        }
-        
-        private enum CodingKeys: String, CodingKey {
-            case data = "data"
-        }
-        
-        private enum QuestionCodingKeys: String, CodingKey {
-            case question = "question"
-        }
-        
-        private enum DescriptionCodingKeys: String, CodingKey {
-            case content = "content"
-        }
-    }
-    
     static let shared = LeetCodeProblemRepository()
-}
-
-enum LeetCodeSigninError: Error {
-    case wrongEmailOrPassword
 }
 
 enum LeetCodeAPIConnectionError: Error {
     case networkAbort
 }
 
+enum LeetCodeSigninError: Error {
+    case unencodableEmailOrPassword
+    case wrongEmailOrPassword
+}
+
+enum LeetCodeProblemAPIError: Error {
+    case inappropriateResponse
+    case inappropriateJSON
+}
+
 enum LeetCodeSubmissionAPIError: Error {
-    case noPreciseResponseReturned
-    case jsonDecodeFailed
+    case inappropriateResponse
+    case inappropriateJSON
 }
 
 enum LeetCodeProblemDescriptionAPIError: Error {
-    case noDescriptionDataReturned
-    case jsonDecodeFailed
+    case inappropriateResponse
+    case inappropriateJSON
+}
+
+enum APILeetCodeSubmissionError: Error {
+    case submittedAtDecodeFailure
+}
+
+fileprivate struct LeetCodeAPIAllJSON: Decodable {
+    var problems: [APIUserLeetCodeProblem]
+
+    private enum CodingKeys: String, CodingKey {
+       case problems = "stat_status_pairs"
+    }
+
+    struct APIUserLeetCodeProblem: Decodable, UserLeetCodeProblem {
+       var problem: LeetCodeProblem
+       var status: UserLeetCodeProblemStatus
+       
+       init(from decoder: Decoder) throws {
+           let container = try decoder.container(keyedBy: CodingKeys.self)
+           let statContainer = try container.nestedContainer(keyedBy: StatCodingKeys.self, forKey: .stat)
+           let difficultyContainer = try container.nestedContainer(keyedBy: DifficultyCodingKeys.self, forKey: .difficulty)
+           
+           let id = try statContainer.decode(String.self, forKey: .id)
+           let number = try statContainer.decode(Int.self, forKey: .number)
+           let difficultyInt = try difficultyContainer.decode(Int.self, forKey: .difficulty)
+           let title = try statContainer.decode(String.self, forKey: .title)
+           let statusString = try container.decode(String?.self, forKey: .status)
+           
+           var difficulty: LeetCodeProblemDifficuly!
+           
+           switch difficultyInt {
+           case 1:
+               difficulty = .easy
+           case 2:
+               difficulty = .medium
+           case 3:
+               difficulty = .hard
+           default:
+               assertionFailure()
+           }
+           
+           problem = APILeetCodeProblem(id: id, number: number, difficulty: difficulty, title: title)
+           
+           var status: UserLeetCodeProblemStatus!
+           
+           switch statusString {
+           case "ac":
+               status = .solved
+           case "notac":
+               status = .attempted
+           case nil:
+               status = .unsolved
+           default:
+               assertionFailure()
+           }
+           
+           self.status = status
+       }
+       
+       private enum CodingKeys: String, CodingKey {
+           case stat = "stat"
+           case difficulty = "difficulty"
+           case status = "status"
+       }
+       
+       private enum StatCodingKeys: String, CodingKey {
+           case id = "question__title_slug"
+           case number = "frontend_question_id"
+           case title = "question__title"
+       }
+       
+       private enum DifficultyCodingKeys: String, CodingKey {
+           case difficulty = "level"
+       }
+    }
+
+    struct APILeetCodeProblem: LeetCodeProblem {
+       var id: String
+       var number: Int
+       var difficulty: LeetCodeProblemDifficuly
+       var title: String
+    }
+}
+
+fileprivate struct LeetCodeDetailAPIAllJSON: Decodable {
+    let content: LeetCodeProblemDescription
+
+    init(from decoder: Decoder) throws {
+       let container = try decoder.container(keyedBy: CodingKeys.self)
+       let questionContainer = try container.nestedContainer(keyedBy: QuestionCodingKeys.self, forKey: .data)
+       let descriptionContent = try questionContainer.nestedContainer(keyedBy:  DescriptionCodingKeys.self, forKey: .question)
+       let contentWithHtmlTag = try descriptionContent.decode(LeetCodeProblemDescription.self, forKey: .content)
+       
+       content = removeHtmlTag(contentWithHtmlTag)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+       case data = "data"
+    }
+
+    private enum QuestionCodingKeys: String, CodingKey {
+       case question = "question"
+    }
+
+    private enum DescriptionCodingKeys: String, CodingKey {
+       case content = "content"
+    }
 }
 
 fileprivate struct LeetCodeSubmissionAPIJSON: Decodable {
@@ -378,12 +387,8 @@ fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
         default:
             status = .failed
         }
-
-        guard let submissionTimestampInt = Int(submissionTimestamp) else {
-            throw APILeetCodeSubmissionError.submittedAtDecodeFailure
-        }
         
-        submittedAt = Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(submissionTimestampInt)))
+        submittedAt = Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(Int(submissionTimestamp)!)))
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -394,36 +399,29 @@ fileprivate struct APILeetCodeSubmission: LeetCodeSubmission, Decodable {
         case usedMemoryString = "memory"
         case submissionTimestamp = "timestamp"
     }
-    
-    enum APILeetCodeSubmissionError: Error {
-        case submittedAtDecodeFailure
-    }
 }
 
 fileprivate func sanitizeUsedLanguage(_ language: String) -> String {
-    if language == "javascript" {
+    switch language {
+    case "javascript":
         return "JavaScript"
+    default:
+        return language.capitalized
     }
-    
-    return language.capitalized
 }
 
 fileprivate func sanitizeRuntime(_ runtime: String) -> String {
-    if runtime == "N/A" {
-        return "0 ms"
-    }
-    
-    return runtime
+    return runtime == "N/A" ? "0 ms" : runtime
 }
 
 fileprivate func sanitizeMemoryUsage(_ memoryUsage: String) -> String {
-    if memoryUsage == "N/A" {
-        return "0 MB"
-    }
-    
-    return memoryUsage
+    return memoryUsage == "N/A" ? "0 MB" : memoryUsage
 }
 
-func removeHtmlTag(_ content: String) -> String {
-    return content.replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: content.range(of: content)).replacingOccurrences(of: "&quot;", with: "").replacingOccurrences(of: "&nbsp;", with: "").replacingOccurrences(of: "&#39;", with: "'")
+fileprivate func removeHtmlTag(_ content: String) -> String {
+    return content
+        .replacingOccurrences(of: "<(\"[^\"]*\"|'[^']*'|[^'\">])*>", with: "", options: .regularExpression, range: content.range(of: content))
+        .replacingOccurrences(of: "&quot;", with: "")
+        .replacingOccurrences(of: "&nbsp;", with: "")
+        .replacingOccurrences(of: "&#39;", with: "'")
 }
