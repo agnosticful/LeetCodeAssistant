@@ -2,8 +2,8 @@ import UIKit
 
 class ProblemDetailTableViewController: UITableViewController {
     var problem: LeetCodeProblem!
-    var problemDescription: LeetCodeProblemDescription!
-    var isproblemDescriptionLoading = false
+    private var problemDescription: LeetCodeProblemDescription?
+    private var isproblemDescriptionLoading = false
     private var submissions: [LeetCodeSubmission]?
     private var isSubmissionLoading = false
     private var lastBestSubmission: LeetCodeSubmission?
@@ -19,13 +19,17 @@ class ProblemDetailTableViewController: UITableViewController {
         isSubmissionLoading = true
         isproblemDescriptionLoading = true
         isLastBestSubmissionCodeLoading = true
+
         tableView.reloadData()
         
         LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDescription, error) in
+            self.isproblemDescriptionLoading = false
+
+            guard let problemDescription = problemDescription else { return }
+
             self.problemDescription = problemDescription
-            
+
             DispatchQueue.main.async {
-                self.isproblemDescriptionLoading = false
                 self.tableView.reloadData()
             }
         }
@@ -150,8 +154,12 @@ class ProblemDetailTableViewController: UITableViewController {
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "DescriptionCell")! as! ProblemDetailTableViewDescriptionCell
             
-            cell.set(problemDescription: problemDescription)
-            
+            if let problemDescription = problemDescription {
+                cell.set(problemDescription: problemDescription)
+            } else {
+                cell.setFailed()
+            }
+
             return cell
         case (2, 0):
             if isLastBestSubmissionCodeLoading {
@@ -252,6 +260,10 @@ class ProblemDetailTableViewTitleCell: UITableViewCell {
 class ProblemDetailTableViewDescriptionCell: UITableViewCell {
     func set(problemDescription: LeetCodeProblemDescription) {
         textLabel?.text = problemDescription
+    }
+    
+    func setFailed() {
+        textLabel?.text = "Failed to load description."
     }
 }
 
