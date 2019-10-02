@@ -147,9 +147,9 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
                 filteredAttemptedProblems = attemptedProblems.filter { String($0.problem.number).contains(String(number)) }
                 filteredUnsolvedProblems = unsolvedProblems.filter { String($0.problem.number).contains(String(number)) }
             } else {
-                filteredSolvedProblems = solvedProblems.filter { $0.problem.title.contains(text) }
-                filteredAttemptedProblems = attemptedProblems.filter { $0.problem.title.contains(text) }
-                filteredUnsolvedProblems = unsolvedProblems.filter { $0.problem.title.contains(text) }
+                filteredSolvedProblems = solvedProblems.filter { removeBrankAndLowercase($0.problem.title).contains(removeBrankAndLowercase(text)) }
+                filteredAttemptedProblems = attemptedProblems.filter { removeBrankAndLowercase($0.problem.title).contains(removeBrankAndLowercase(text)) }
+                filteredUnsolvedProblems = unsolvedProblems.filter { removeBrankAndLowercase($0.problem.title).contains(removeBrankAndLowercase(text)) }
             }
 
             tableView.reloadData()
@@ -187,5 +187,8 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
         filteredSolvedProblems = solvedProblems
         filteredAttemptedProblems = attemptedProblems
         filteredUnsolvedProblems = unsolvedProblems
+    }
+    fileprivate func removeBrankAndLowercase(_ str: String) -> String {
+        return str.lowercased().replacingOccurrences(of: " ", with: "")
     }
 }
