@@ -23,14 +23,48 @@ class LeetCodeProblemCache {
         }
 
         try? data.write(to: LeetCodeProblemCache.userLeetCodeProblemListPath, options: .noFileProtection)
-        
+
         debugPrint("problem cache has been saved")
     }
     
+    func loadLeetCodeProblemDescription(byId id: String) -> LeetCodeProblemDescription? {
+        guard let data = try? Data(contentsOf: LeetCodeProblemCache.getLeetCodeProblemDescriptionPath(byId: id)) else {
+            return nil
+        }
+
+        guard let description = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+
+        debugPrint("description cache has been loaded")
+
+        return description
+    }
+
+    func saveLeetCodeProblemDescription(_ description: LeetCodeProblemDescription, forId id: String) {
+        guard let data = description.data(using: .utf8) else {
+            return
+        }
+
+        let path = LeetCodeProblemCache.getLeetCodeProblemDescriptionPath(byId: id)
+
+        if !FileManager.default.fileExists(atPath: path.deletingLastPathComponent().absoluteString) {
+            try? FileManager.default.createDirectory(at: path.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+        }
+
+        try? data.write(to: path, options: .noFileProtection)
+
+        debugPrint("description cache has been saved")
+    }
+
     static let shared = LeetCodeProblemCache()
     
     private static let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-    private static let userLeetCodeProblemListPath = cacheDirectory.appendingPathComponent("problems").appendingPathExtension("plist")
+    private static let userLeetCodeProblemListPath = cacheDirectory.appendingPathComponent("problem-list").appendingPathExtension("plist")
+
+    private static func getLeetCodeProblemDescriptionPath(byId id: String) -> URL {
+        return cacheDirectory.appendingPathComponent("problems", isDirectory: true).appendingPathComponent(id, isDirectory: true).appendingPathComponent("description").appendingPathExtension("txt")
+    }
 }
 
 struct CodableLeetCodeProblem: LeetCodeProblem, Codable {

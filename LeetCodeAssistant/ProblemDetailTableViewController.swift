@@ -21,13 +21,23 @@ class ProblemDetailTableViewController: UITableViewController {
         isLastBestSubmissionCodeLoading = true
 
         tableView.reloadData()
-        
+
+        if let problemDescription = LeetCodeProblemCache.shared.loadLeetCodeProblemDescription(byId: problem.id) {
+            self.problemDescription = problemDescription
+            
+            isproblemDescriptionLoading = false
+            
+            tableView.reloadData()
+        }
+
         LeetCodeProblemRepository.shared.getProblemDescription(id: problem.id) { (problemDescription, error) in
             self.isproblemDescriptionLoading = false
 
             guard let problemDescription = problemDescription else { return }
 
             self.problemDescription = problemDescription
+
+            LeetCodeProblemCache.shared.saveLeetCodeProblemDescription(problemDescription, forId: self.problem.id)
 
             DispatchQueue.main.async {
                 self.tableView.reloadData()
