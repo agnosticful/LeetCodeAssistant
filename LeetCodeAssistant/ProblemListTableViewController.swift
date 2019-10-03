@@ -143,13 +143,13 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if let text = searchBar.text?.trimmingCharacters(in: .whitespaces) {
             if let number = Int(text) {
-                filteredSolvedProblems = solvedProblems.filter { String($0.problem.number).localizedCaseInsensitiveContains(String(number)) }
-                filteredAttemptedProblems = attemptedProblems.filter { String($0.problem.number).localizedCaseInsensitiveContains(String(number)) }
-                filteredUnsolvedProblems = unsolvedProblems.filter { String($0.problem.number).localizedCaseInsensitiveContains(String(number)) }
+                filteredSolvedProblems = solvedProblems.filter { String($0.problem.number).contains(String(number)) }
+                filteredAttemptedProblems = attemptedProblems.filter { String($0.problem.number).contains(String(number)) }
+                filteredUnsolvedProblems = unsolvedProblems.filter { String($0.problem.number).contains(String(number)) }
             } else {
-                filteredSolvedProblems = solvedProblems.filter { $0.problem.title.lowercased().localizedCaseInsensitiveContains(text.lowercased()) }
-                filteredAttemptedProblems = attemptedProblems.filter { $0.problem.title.lowercased().localizedCaseInsensitiveContains(text.lowercased()) }
-                filteredUnsolvedProblems = unsolvedProblems.filter { $0.problem.title.lowercased().localizedCaseInsensitiveContains(text.lowercased()) }
+                filteredSolvedProblems = solvedProblems.filter { $0.problem.title.localizedCaseInsensitiveContains(text) }
+                filteredAttemptedProblems = attemptedProblems.filter { $0.problem.title.localizedCaseInsensitiveContains(text) }
+                filteredUnsolvedProblems = unsolvedProblems.filter { $0.problem.title.localizedCaseInsensitiveContains(text) }
             }
 
             tableView.reloadData()
