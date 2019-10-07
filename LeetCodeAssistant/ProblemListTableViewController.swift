@@ -146,6 +146,10 @@ class ProblemListTableViewController: UITableViewController, UISearchBarDelegate
                 filteredSolvedProblems = solvedProblems.filter { String($0.problem.number).contains(String(number)) }
                 filteredAttemptedProblems = attemptedProblems.filter { String($0.problem.number).contains(String(number)) }
                 filteredUnsolvedProblems = unsolvedProblems.filter { String($0.problem.number).contains(String(number)) }
+            } else if text == "" {
+                filteredSolvedProblems = solvedProblems
+                filteredAttemptedProblems = attemptedProblems
+                filteredUnsolvedProblems = unsolvedProblems
             } else {
                 filteredSolvedProblems = solvedProblems.filter { $0.problem.title.localizedCaseInsensitiveContains(text) }
                 filteredAttemptedProblems = attemptedProblems.filter { $0.problem.title.localizedCaseInsensitiveContains(text) }
